@@ -1,0 +1,21 @@
+datasets:
+  orders_raw:
+    upstream: []  # Source dataset, no dependencies
+    description: "Raw order transactions from e-commerce platform"
+    
+  products:
+    upstream: []  # Reference data
+    description: "Product catalog"
+    
+  revenue_daily:
+    upstream:
+      - orders_raw
+      - products
+    description: "Daily revenue aggregated by product"
+    transformation: |
+      JOIN orders_raw with products ON product_id
+      GROUP BY dt, product_id
+      SUM(amount) as total_revenue
+    critical_columns:
+      - product_id  # Must exist in orders_raw
+      - amount      # Must be non-null in orders_raw
